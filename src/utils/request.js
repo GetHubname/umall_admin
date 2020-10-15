@@ -1,13 +1,21 @@
 import axios from 'axios'
 import qs from 'qs'
 import Vue from 'vue'
+import store from '../store'
 
 //开发环境下使用
 Vue.prototype.$imgPre="http://localhost:3000"
-const baseUrl = '/api';
+let baseUrl = '/api';
 // 打包
 // Vue.prototype.$imgPre=""
 // let baseUrl = "";
+
+//请求拦截
+axios.interceptors.request.use(config=>{
+  if(config.url!=baseUrl+'/api/userlogin')
+  config.headers.authorization=store.state.userInfo.token;
+  return config;
+})
 
 //响应拦截：服务端响应组件，每次都要做的事，return内容是组件收到的真正的数据
 axios.interceptors.response.use(res=>{

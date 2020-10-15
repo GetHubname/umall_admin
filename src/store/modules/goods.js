@@ -18,8 +18,9 @@ const mutations={
     },
 }
 const actions={
-    reqList(context){
-        reqGet('/api/goodslist',{size:context.state.size,page:context.state.page}).then(res=>{
+    reqList(context,bool){
+        let data=bool?{}:{page:context.state.page,size:context.state.size}
+        reqGet('/api/goodslist',data).then(res=>{
             let list=res.data.list?res.data.list:[];
             if(context.state.page>1&&list.length==0){
                 context.commit('changePage',context.state.page-1);

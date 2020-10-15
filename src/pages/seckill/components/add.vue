@@ -17,6 +17,7 @@
               start-placeholder="开始日期"
               end-placeholder="结束日期"
               :default-time="['12:00:00']"
+              @change="changeTime"
             >
             </el-date-picker>
           </div>
@@ -37,7 +38,11 @@
           </el-select>
         </el-form-item>
         <el-form-item label="二级分类">
-          <el-select v-model="form.second_cateid" placeholder="请选择" @change="changeGoods">
+          <el-select
+            v-model="form.second_cateid"
+            placeholder="请选择"
+            @change="changeGoods"
+          >
             <el-option
               v-for="item in secondCateList"
               :key="item.id"
@@ -50,10 +55,10 @@
         <el-form-item label="商品">
           <el-select v-model="form.goodsid" placeholder="请选择">
             <el-option
-              v-for="item in goodsList"
-              :key="item"
-              :label="item"
-              :value="item"
+              v-for="item in secondGoodsList"
+              :key="item.id"
+              :label="item.goodsname"
+              :value="item.id"
             >
             </el-option>
           </el-select>
@@ -86,7 +91,8 @@ export default {
   data() {
     return {
       time: "",
-      secondCateList:[],
+      secondCateList: [],
+      secondGoodsList: [],
       form: {
         title: "",
         begintime: "",
@@ -107,18 +113,25 @@ export default {
   },
   methods: {
     ...mapActions({
-      reqList: "banner/reqList",
-      reqCateList:'cate/reqList',
-      reqGoodsList:'goods/reqList'
+      reqList: "seckill/reqList",
+      reqCateList: "cate/reqList",
+      reqGoodsList: "goods/reqList",
     }),
 
     cancel() {
       this.info.isshow = false;
     },
     empty() {
+      this.time = "";
+      this.secondCateList = [];
+      this.secondGoodsList = [];
       this.form = {
         title: "",
-        img: null,
+        begintime: 0,
+        endtime: 0,
+        first_cateid: "",
+        second_cateid: "",
+        goodsid: "",
         status: 1,
       };
     },
@@ -128,12 +141,28 @@ export default {
       });
     },
     changeFirst() {
-        this.getSecondList()
+      this.form.goodsid = "";
+      this.form.second_cateid = "";
+      this.getSecondList();
     },
-    changeGoods(){},
+    getSecondGoods() {
+      reqGet("/api/goodslist", {
+        fid: this.form.first_cateid,
+        sid: this.form.second_cateid,
+      }).then((res) => {
+        this.secondGoodsList = res.data.list;
+      });
+    },
+    changeGoods() {
+      this.form.goodsid = "";
+      this.getSecondGoods();
+    },
+    changeTime() {
+      this.form.begintime = Number(this.time[0].getTime());
+      this.form.endtime = Number(this.time[1].getTime());
+    },
     add() {
-      reqFile("/api/banneradd", this.form).then((res) => {
-        console.log(res);
+      reqPost("/api/seckadd", this.form).then((res) => {
         if (res.data.code == 200) {
           //成功
           successAlert(res.data.msg);
@@ -146,7 +175,9 @@ export default {
       });
     },
     update() {
-      reqFile("/api/banneredit", this.form).then((res) => {
+        this.form.begintime=Number(this.form.begintime);
+          this.form.endtime=Number(this.form.endtime)
+      reqPost("/api/seckedit", this.form).then((res) => {
         if (res.data.code == 200) {
           successAlert(res.data.msg);
           this.cancel();
@@ -158,12 +189,20 @@ export default {
       });
     },
     look(id) {
-      reqGet("/api/bannerinfo", { id: id }).then((res) => {
+      this.time = [];
+      reqGet("/api/seckinfo", { id: id }).then((res) => {
         if (res.data.code == 200) {
           this.form = res.data.list;
+          this.getSecondList();
+          this.getSecondGoods();
           //给form添加id
           this.form.id = id;
-          this.imgUrl = this.$imgPre + this.form.img;
+          this.time.push(
+            new Date(Number(this.form.begintime)),
+            new Date(Number(this.form.endtime))
+          );
+          
+          console.log(this.form,111111111111)
         } else {
           warningAlert(res.data.msg);
         }
@@ -186,7 +225,7 @@ export default {
     if (this.cateList.length == 0) {
       this.reqCateList();
     }
-    this.reqGoodsList()
+    this.reqGoodsList(true);
   },
 };
 </script>
