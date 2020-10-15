@@ -1,0 +1,193 @@
+<template>
+  <div class="add">
+    <el-dialog
+      :title="info.isAdd ? '添加活动' : '修改活动'"
+      :visible.sync="info.isshow"
+      @closed="close"
+    >
+      <el-form :model="form" label-width="80px">
+        <el-form-item label="活动名称">
+          <el-input v-model="form.title"></el-input>
+        </el-form-item>
+        <el-form-item label="活动期限">
+          <div class="block">
+            <el-date-picker
+              v-model="time"
+              type="datetimerange"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"
+              :default-time="['12:00:00']"
+            >
+            </el-date-picker>
+          </div>
+        </el-form-item>
+        <el-form-item label="一级分类">
+          <el-select
+            v-model="form.first_cateid"
+            placeholder="请选择"
+            @change="changeFirst"
+          >
+            <el-option
+              v-for="item in cateList"
+              :key="item.id"
+              :label="item.catename"
+              :value="item.id"
+            >
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="二级分类">
+          <el-select v-model="form.second_cateid" placeholder="请选择" @change="changeGoods">
+            <el-option
+              v-for="item in secondCateList"
+              :key="item.id"
+              :label="item.catename"
+              :value="item.id"
+            >
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="商品">
+          <el-select v-model="form.goodsid" placeholder="请选择">
+            <el-option
+              v-for="item in goodsList"
+              :key="item"
+              :label="item"
+              :value="item"
+            >
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="状态">
+          <el-switch
+            v-model="form.status"
+            :active-value="1"
+            :inactive-value="2"
+          ></el-switch>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="cancel()">取 消</el-button>
+        <el-button type="primary" @click="add()" v-if="info.isAdd"
+          >添 加</el-button
+        >
+        <el-button type="primary" @click="update()" v-else>修 改</el-button>
+      </div>
+    </el-dialog>
+  </div>
+</template>
+<script>
+import { reqGet, reqPost, req2, reqFile } from "../../../utils/request";
+import { mapGetters, mapActions } from "vuex";
+import { successAlert, warningAlert } from "../../../utils/alter";
+export default {
+  props: ["info"],
+  components: {},
+  data() {
+    return {
+      time: "",
+      secondCateList:[],
+      form: {
+        title: "",
+        begintime: "",
+        endtime: "",
+        first_cateid: "",
+        second_cateid: "",
+        goodsid: "",
+        status: 1,
+      },
+    };
+  },
+  computed: {
+    ...mapGetters({
+      list: "banner/list",
+      cateList: "cate/list",
+      goodsList: "goods/list",
+    }),
+  },
+  methods: {
+    ...mapActions({
+      reqList: "banner/reqList",
+      reqCateList:'cate/reqList',
+      reqGoodsList:'goods/reqList'
+    }),
+
+    cancel() {
+      this.info.isshow = false;
+    },
+    empty() {
+      this.form = {
+        title: "",
+        img: null,
+        status: 1,
+      };
+    },
+    getSecondList() {
+      reqGet("/api/catelist", { pid: this.form.first_cateid }).then((res) => {
+        this.secondCateList = res.data.list;
+      });
+    },
+    changeFirst() {
+        this.getSecondList()
+    },
+    changeGoods(){},
+    add() {
+      reqFile("/api/banneradd", this.form).then((res) => {
+        console.log(res);
+        if (res.data.code == 200) {
+          //成功
+          successAlert(res.data.msg);
+          this.cancel();
+          this.empty();
+          this.reqList();
+        } else {
+          warningAlert(res.data.msg);
+        }
+      });
+    },
+    update() {
+      reqFile("/api/banneredit", this.form).then((res) => {
+        if (res.data.code == 200) {
+          successAlert(res.data.msg);
+          this.cancel();
+          this.empty();
+          this.reqList();
+        } else {
+          warningAlert(res.data.msg);
+        }
+      });
+    },
+    look(id) {
+      reqGet("/api/bannerinfo", { id: id }).then((res) => {
+        if (res.data.code == 200) {
+          this.form = res.data.list;
+          //给form添加id
+          this.form.id = id;
+          this.imgUrl = this.$imgPre + this.form.img;
+        } else {
+          warningAlert(res.data.msg);
+        }
+      });
+    },
+    changeType() {
+      if (this.form.pid == 0) {
+        this.form.type = 1;
+      } else {
+        this.form.type = 2;
+      }
+    },
+    close() {
+      if (!this.info.isAdd) {
+        this.empty();
+      }
+    },
+  },
+  mounted() {
+    if (this.cateList.length == 0) {
+      this.reqCateList();
+    }
+    this.reqGoodsList()
+  },
+};
+</script>
+<style lang='stylus' scoped></style>
