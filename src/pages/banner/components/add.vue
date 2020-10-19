@@ -39,7 +39,7 @@
   </div>
 </template>
 <script>
-import { reqGet, reqPost,req2, reqFile } from "../../../utils/request";
+import { reqGet, reqPost, req2, reqFile } from "../../../utils/request";
 import { mapGetters, mapActions } from "vuex";
 import { successAlert, warningAlert } from "../../../utils/alter";
 export default {
@@ -50,7 +50,7 @@ export default {
       imgUrl: "",
       form: {
         title: "",
-        img:null,
+        img: null,
         status: 1,
       },
     };
@@ -64,10 +64,9 @@ export default {
     ...mapActions({
       reqList: "banner/reqList",
     }),
-    getFile(e){
+    getFile(e) {
       let file = e.raw;
 
-      
       //URL.createObjectURL() 可以通过文件生成一个地址
       this.imgUrl = URL.createObjectURL(file);
 
@@ -78,14 +77,28 @@ export default {
       this.info.isshow = false;
     },
     empty() {
-      this.imgUrl="";
+      this.imgUrl = "";
       this.form = {
         title: "",
-        img:null,
+        img: null,
         status: 1,
       };
     },
+    can() {
+      if (this.form.title == "") {
+        warningAlert("标题不能为空");
+        return false;
+      }
+      if (this.form.img == null) {
+        warningAlert("图片不能为空");
+        return false;
+      }
+      return true;
+    },
     add() {
+      if (!this.can()) {
+        return;
+      }
       reqFile("/api/banneradd", this.form).then((res) => {
         console.log(res);
         if (res.data.code == 200) {
@@ -100,17 +113,19 @@ export default {
       });
     },
     update() {
+      if (!this.can()) {
+        return;
+      }
       reqFile("/api/banneredit", this.form).then((res) => {
         if (res.data.code == 200) {
           successAlert(res.data.msg);
           this.cancel();
           this.empty();
           this.reqList();
-        }else {
+        } else {
           warningAlert(res.data.msg);
         }
       });
-
     },
     look(id) {
       reqGet("/api/bannerinfo", { id: id }).then((res) => {
@@ -118,7 +133,7 @@ export default {
           this.form = res.data.list;
           //给form添加id
           this.form.id = id;
-          this.imgUrl=this.$imgPre+this.form.img;
+          this.imgUrl = this.$imgPre + this.form.img;
         } else {
           warningAlert(res.data.msg);
         }
@@ -142,26 +157,29 @@ export default {
 <style lang='stylus' scoped>
 /* element-ui */
 .add >>> .avatar-uploader .el-upload {
-    border: 1px dashed #d9d9d9 !important;
-    border-radius: 6px;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-  }
-  .avatar-uploader .el-upload:hover {
-    border-color: #409EFF;
-  }
-  .avatar-uploader-icon {
-    font-size: 28px;
-    color: #8c939d;
-    width: 178px;
-    height: 178px;
-    line-height: 178px;
-    text-align: center;
-  }
-  .avatar {
-    width: 178px;
-    height: 178px;
-    display: block;
-  }
+  border: 1px dashed #d9d9d9 !important;
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.avatar-uploader .el-upload:hover {
+  border-color: #409EFF;
+}
+
+.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 178px;
+  height: 178px;
+  line-height: 178px;
+  text-align: center;
+}
+
+.avatar {
+  width: 178px;
+  height: 178px;
+  display: block;
+}
 </style>

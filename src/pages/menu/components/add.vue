@@ -116,6 +116,18 @@ export default {
       };
     },
     add() {
+      if(this.form.title==''){
+        warningAlert('菜单名称不能为空');
+        return;
+      }
+      if(this.form.type==1&&this.form.icon==''){
+        warningAlert('菜单图标不能为空');
+        return;
+      }
+      if(this.form.type==2&&this.form.url==''){
+        warningAlert('菜单地址不能为空');
+        return;
+      }
       reqPost("/api/menuadd", {
         pid: this.form.pid,
         title: this.form.title,
@@ -137,6 +149,18 @@ export default {
       });
     },
     update() {
+      if(this.form.title==''){
+        warningAlert('菜单名称不能为空');
+        return;
+      }
+      if(this.form.type==1&&this.form.icon==''){
+        warningAlert('菜单图标不能为空');
+        return;
+      }
+      if(this.form.type==2&&this.form.url==''){
+        warningAlert('菜单地址不能为空');
+        return;
+      }
       reqPost("/api/menuedit", {
         id: this.form.id,
         pid: this.form.pid,

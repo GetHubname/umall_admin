@@ -52,8 +52,6 @@ export default {
   components: {},
   data() {
     return {
-      isshow: true,
-
       form: {
         roleid: "",
         username: "",
@@ -86,6 +84,18 @@ export default {
       };
     },
     add() {
+      if(this.form.roleid==''){
+        warningAlert("所属角色不能为空");
+        return;
+      }
+      if(this.form.username==''){
+        warningAlert("用户名不能为空");
+        return;
+      }
+      if(this.form.password==''){
+        warningAlert("密码不能为空");
+        return;
+      }
       reqPost("/api/useradd", {
         roleid: this.form.roleid,
         username: this.form.username,
@@ -106,6 +116,18 @@ export default {
       });
     },
     update() {
+      if(this.form.roleid==''){
+        warningAlert("所属角色不能为空");
+        return;
+      }
+      if(this.form.username==''){
+        warningAlert("用户名不能为空");
+        return;
+      }
+      if(this.form.password==''){
+        warningAlert("密码不能为空");
+        return;
+      }
       reqPost("/api/useredit", {
         uid:this.form.uid,
         roleid: this.form.roleid,

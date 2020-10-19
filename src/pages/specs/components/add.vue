@@ -95,7 +95,7 @@ export default {
       return true;
     },
     add() {
-      this.form.attrs=JSON.stringify(this.attrArr.map(item=>item.value))
+      this.form.attrs=JSON.stringify(this.attrArr.map(item=>item.value));
       if(!this.checkedData()){
         return
       }

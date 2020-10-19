@@ -112,16 +112,20 @@ export default {
     },
     getFile2(e) {
       let file = e.raw;
-
-      
       //URL.createObjectURL() 可以通过文件生成一个地址
       this.imgUrl = URL.createObjectURL(file);
-
       //将文件保存在form.img
       this.form.img = file;
     },
     add() {
-        
+        if(this.form.catename==''){
+          warningAlert("分类名称不能为空");
+          return;
+        }
+        if(this.form.pid!=0&&this.form.img==null){
+          warningAlert("图片不能为空");
+          return;
+        }
       reqFile("/api/cateadd", {
         pid: this.form.pid,
         catename: this.form.catename,
@@ -140,6 +144,14 @@ export default {
       });
     },
     update() {
+        if(this.form.catename==''){
+          warningAlert("分类名称不能为空");
+          return;
+        }
+        if(this.form.pid!=0&&this.form.img==null){
+          warningAlert("图片不能为空");
+          return;
+        }
       reqFile("/api/cateedit", this.form).then((res) => {
         if (res.data.code == 200) {
           successAlert(res.data.msg);

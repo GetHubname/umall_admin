@@ -77,7 +77,14 @@ export default {
     },
     add() {
       this.form.menus=JSON.stringify(this.$refs.tree.getCheckedKeys());
-      console.log(this.form)
+      if(this.form.rolename==''){
+        warningAlert("角色名称不能为空");
+        return;
+      }
+      if(this.form.menus='[]'){
+        warningAlert('角色权限不能为空');
+        return
+      }
       reqPost("/api/roleadd", this.form).then((res) => {
         console.log(res);
         if (res.data.code == 200) {
@@ -92,7 +99,15 @@ export default {
       });
     },
     update() {
-      this.form.menus=JSON.stringify(this.$refs.tree.getCheckedKeys())
+      this.form.menus=JSON.stringify(this.$refs.tree.getCheckedKeys());
+      if(this.form.rolename==''){
+        warningAlert("角色名称不能为空");
+        return;
+      }
+      if(this.form.menus='[]'){
+        warningAlert('角色权限不能为空');
+        return
+      }
       reqPost("/api/roleedit", {
         id: this.form.id,
         rolename: this.form.rolename,

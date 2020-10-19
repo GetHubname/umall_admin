@@ -202,12 +202,61 @@ export default {
       this.imgUrl = URL.createObjectURL(file);
       this.form.img = file;
     },
+    can(){
+      if(this.form.first_cateid==''){
+        warningAlert('一级分类不能为空')
+        return false
+      }
+      if(this.form.second_cateid==''){
+        warningAlert('二级分类不能为空')
+        return false
+      }
+      if(this.form.goodsname==''){
+        warningAlert('商品名称不能为空')
+        return false
+      }
+      if(this.form.price==''){
+        warningAlert('价格不能为空')
+        return false
+      }else if(!/^\d+(\.\d+)?$/.test(this.form.price)){
+        warningAlert('价格不是数字')
+        return false
+      }
+      if(this.form.market_price==''){
+        warningAlert('市场价格不能为空')
+        return false
+      }else if(!/^\d+(\.\d+)?$/.test(this.form.market_price)){
+        warningAlert('市场价格不是数字')
+        return false
+      }
+      if(this.form.img==null){
+        warningAlert('图片不能为空')
+        return false
+      }
+      if(this.form.specsid==''){
+        warningAlert('商品规格不能为空')
+        return false
+      }
+      if(this.form.specsattr.length<=0){
+        warningAlert('规格属性不能为空')
+        return false
+      }
+      if(this.editor.txt.html()==''){
+        warningAlert('商品描述不能为空')
+        return false
+      }
+      return true;
+    },
     add() {
+      if(!this.can()){
+        return;
+      }
       this.form.description=this.editor.txt.html();
       let data = {
         ...this.form,
         specsattr: JSON.stringify(this.form.specsattr),
       };
+      
       reqFile("/api/goodsadd", data).then((res) => {
         if (res.data.code == 200) {
           //成功
@@ -223,6 +272,9 @@ export default {
     },
     update() {
       this.form.description=this.editor.txt.html();
+      if(!this.can()){
+        return;
+      }
       let data={
         ...this.form,
         specsattr:JSON.stringify(this.form.specsattr)

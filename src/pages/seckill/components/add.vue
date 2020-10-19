@@ -158,10 +158,40 @@ export default {
       this.getSecondGoods();
     },
     changeTime() {
-      this.form.begintime = Number(this.time[0].getTime());
-      this.form.endtime = Number(this.time[1].getTime());
+      this.form.begintime = this.time ? Number(this.time[0].getTime()) : 0;
+      this.form.endtime = this.time ? Number(this.time[1].getTime()) : 0;
+    },
+    can() {
+      if (this.form.title == "") {
+        warningAlert("活动名称不能为空");
+        return false;
+      }
+      if (this.form.begintime == 0 && this.form.endtime == 0) {
+        warningAlert("活动期限不能为空");
+        return false;
+      }
+      if (this.form.begintime < new Date().getTime()) {
+        warningAlert("活动已过期");
+        return false;
+      }
+      if (this.form.first_cateid == "") {
+        warningAlert("一级分类不能为空");
+        return false;
+      }
+      if (this.form.second_cateid == "") {
+        warningAlert("二级分类不能为空");
+        return false;
+      }
+      if (this.form.goodsid == "") {
+        warningAlert("商品不能为空");
+        return false;
+      }
+      return true;
     },
     add() {
+      if (!this.can()) {
+        return;
+      }
       reqPost("/api/seckadd", this.form).then((res) => {
         if (res.data.code == 200) {
           //成功
@@ -175,8 +205,8 @@ export default {
       });
     },
     update() {
-        this.form.begintime=Number(this.form.begintime);
-          this.form.endtime=Number(this.form.endtime)
+      this.form.begintime = Number(this.form.begintime);
+      this.form.endtime = Number(this.form.endtime);
       reqPost("/api/seckedit", this.form).then((res) => {
         if (res.data.code == 200) {
           successAlert(res.data.msg);
@@ -201,8 +231,8 @@ export default {
             new Date(Number(this.form.begintime)),
             new Date(Number(this.form.endtime))
           );
-          
-          console.log(this.form,111111111111)
+
+          console.log(this.form, 111111111111);
         } else {
           warningAlert(res.data.msg);
         }
